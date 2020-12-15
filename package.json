@@ -1,5 +1,5 @@
 {
-  "name": "TodoApp",
+  "name": "app",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -9,8 +9,16 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@line/liff": "^2.6.0",
+    "@nuxtjs/dotenv": "^1.4.1",
+    "axios": "^0.21.0",
     "core-js": "^3.6.5",
-    "nuxt": "^2.14.6"
+    "firebase": "^8.1.2",
+    "firebaseui": "^4.7.1",
+    "nuxt": "^2.14.11",
+    "pakage.json": "^1.0.0",
+    "vim": "^0.1.0",
+    "vuexfire": "^3.2.4"
   },
   "devDependencies": {
     "@nuxtjs/vuetify": "^1.11.2"
