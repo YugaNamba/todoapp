@@ -60,6 +60,6 @@ exports.login = functions.https.onCall(async data => {
     } catch (e) {
       console.error(JSON.stringify(e, null, '  '))
       return { error: e.message }
-    }
+    } 
   })
 })
