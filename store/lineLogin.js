@@ -16,10 +16,10 @@ export const actions = {
         console.log('LIFF初期化失敗', err)
       })
       .then(() => {
-          if (!liff.isLoggedIn()) {
-            liff.login();
-          }
-        })
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        }
+      })
   }),
   auth: firestoreAction(() => {
     auth().onAuthStateChanged(async user => {
@@ -28,14 +28,24 @@ export const actions = {
         state.user = user
       } else {// 3.2 firebaseにログインしていない場合
         // 3.2.1 LIFF APIを利用して、LINEのアクセストークンを取得
-        console.log('not logined')
-        const accessToken = liff.getAccessToken()
-        // 3.2.3 LINEのIDトークンをfirebase functionsに投げて、firebaseのカスタム認証用トークンを取得
-        const login = functions.httpsCallable('login')
-        const result = login({ accessToken })
-          .then((data) => {
-          console.log(data)
+        const data = {}
+        data.accessToken = await liff.getAccessToken()
+        await liff.getProfile()
+        .then(profile => {
+          data.name = profile.displayName
+          data.id = profile.userId
         })
+        .catch((err) => {
+          console.log('error', err);
+        })
+        console.log(data)
+      functions.useFunctionsEmulator("http://localhost:5001")
+        const login = functions.httpsCallable('login')
+        const result = await login(data)
+          .then(async (response) => {
+            console.log('function finished',response)
+          })
+        console.log('loginResult:', result)
         // if (result.data.error) {
         //   console.error(result.data.error)
         // } else {
@@ -45,7 +55,13 @@ export const actions = {
         // }
       }
     })
-  })
+})
+    // auth: firestoreAction(() => {
+    //   functions.useFunctionsEmulator("http://localhost:5001");
+    //   const helloOnCall = functions.httpsCallable("helloOnCall");
+    //   const res = helloOnCall({});
+    //   console.log(res);
+    // })
 }
 
 export const getters  = {

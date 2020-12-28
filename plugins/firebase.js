@@ -16,7 +16,5 @@ if (!firebase.apps.length) {
 }
 
 export default firebase
-const auth = firebase.auth
-const functions = firebase.app().functions('asia-northeast1')
-
-export { auth,  functions }
+export const functions = firebase.functions()
+export const auth = firebase.auth

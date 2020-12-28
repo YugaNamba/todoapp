@@ -1,21 +1,57 @@
 const admin = require("firebase-admin")
 const functions = require('firebase-functions')
-const axios = require('axios')
 var request = require('request')
-//require・・importの代わりにmoduleを読み込んでいる
 const channelId = '1655338472-ke8Na9Zj'
 //チャンネルのIDの設定
 
 admin.initializeApp()
-//何してるかわからない
 
-const axiosInstance = axios.create({
-  baseURL: 'https://api.line.me/oauth2/v2.1/verify?access_token=',
-    //バックのURL：portの指定
-    responseType: 'json'
+
+exports.login = functions.https.onCall(async data => { 
+  const accessToken = data.accessToken
+  const lineUserId = data.id
+  const options = {
+    url: 'https://api.line.me/oauth2/v2.1/verify?access_token=' + accessToken,
+    method: 'GET',
+    json: true
+  }
+  request(options, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      const firebaseToken = generateFirebaseToken(lineUserId)
+        .then((arg) => {
+          const firebaseToken = arg.customToken
+          const firebaseUid = arg.firebaseUid
+        const ret = {
+              firebase_token: firebaseToken,
+            }
+            return (JSON.stringify(ret))
+      })
+    } else {
+        functions.logger.debug("error, body : " + body)
+        const ret = {
+          error_message: "Authentication error:Cannot verify access token.",
+        }
+        response.status(403).send(JSON.stringify(ret))
+    }
+  })
 })
 
-// 渡されたLINEトークンが正しいものかを検証
+function generateFirebaseToken(lineMid) {
+  const firebaseUid = 'line:' + lineMid
+  const additionalClaims = {
+    provider:'LINE'
+  }
+  try {
+    const customToken = await admin.firebase
+      .auth()
+      .createCustomToken(firebaseUid, additionalClaims)
+    return { customToken, firebaseUid }
+  }catch (error) {
+    functions.logger.debug("Error creating custom token:", error);
+    return null
+  }
+}
+
 const verifyToken = async accessToken => {
     const response = await axiosInstance.get( { params: { access_token: accessToken }} )
     if (response.status !== 200) {

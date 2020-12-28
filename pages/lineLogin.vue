@@ -4,7 +4,10 @@
     <!-- <p>{{ this.$store.getters.user }}</p> -->
   </div>
 </template>
+
 <script>
+import { functions } from "~/plugins/firebase";
+
 export default {
   async mounted(){
     await this.$store.dispatch('lineLogin/liffinit')
